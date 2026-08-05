@@ -72,14 +72,15 @@
     background: var(--accent);
     border-radius: 2px;
   }
-  .toggle { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+  .toggle { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
   .toggle button {
     flex: 1;
-    padding: 0.65rem 1rem;
+    min-width: 0;
+    padding: 0.65rem 0.7rem;
     border: 2px solid var(--border);
     background: var(--card);
     border-radius: var(--radius);
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
     color: var(--muted);
@@ -251,6 +252,24 @@
     margin-top: 0.35em;
     padding-top: 0.35em;
   }
+  .rcp-only { display: none; }
+  .is-rcp .rcp-only { display: block; }
+  .pv-memo {
+    margin-top: 0.85em;
+    font-size: 0.9em;
+    padding: 0.55em 0.65em;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+  }
+  .pv-memo .lb { font-size: 0.78em; color: #6b7280; margin-bottom: 0.2em; }
+  .pv-ack {
+    margin-top: 1em;
+    text-align: center;
+    font-size: 0.95em;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
   @media print {
     body { background: #fff; }
     .no-print { display: none !important; }
@@ -282,6 +301,7 @@
       <div class="toggle" role="group" aria-label="Баримтын төрөл">
         <button type="button" id="tInv" class="is-on">Нэхэмжлэх</button>
         <button type="button" id="tEst">Үнийн санал</button>
+        <button type="button" id="tRcp">Баримт</button>
       </div>
 
       <h2>Үндсэн мэдээлэл</h2>
@@ -317,6 +337,10 @@
         <label for="tel">Утас</label>
         <input type="tel" id="tel" autocomplete="tel" placeholder="9911-2233">
       </div>
+      <div class="field rcp-only" id="memoField">
+        <label for="memo">Гүйлгээний утга</label>
+        <input type="text" id="memo" placeholder="Үйлчилгээний төлбөр">
+      </div>
 
       <h2 style="margin-top:1.5rem">Задаргаа</h2>
       <div style="margin-bottom:0.6rem">
@@ -332,10 +356,11 @@
 
       <div class="actions">
         <button type="button" class="btn btn-primary" id="doPdf">PDF болгож хадгалах</button>
+        <button type="button" class="btn btn-ghost" id="doWord">Word болгож хадгалах</button>
         <button type="button" class="btn btn-ghost" id="doSave">Хадгалах</button>
         <button type="button" class="btn btn-ghost" id="doNew">Шинэ баримт</button>
       </div>
-      <p class="note">"PDF болгож хадгалах" товчлуур дээр дарвал хэвлэх цонх нээгдэнэ. Хэвлэхээс өмнө "PDF болгон хадгалах"-ыг сонгоно уу.</p>
+      <p class="note">"PDF болгож хадгалах" товчлуур дээр дарвал хэвлэх цонх нээгдэнэ. Хэвлэхээс өмнө "PDF болгон хадгалах"-ыг сонгоно уу. "Word болгож хадгалах" нь .doc файл татаж, Word дээр засах боломжтой.</p>
 
       <div class="saved">
         <h2>Хадгалсан баримтууд</h2>
@@ -382,6 +407,11 @@
               <div class="r"><span>НӨАТ (10%)</span><span id="pTax">₮0</span></div>
               <div class="r g"><span>Нийт (татвартай)</span><span id="pTot">₮0</span></div>
             </div>
+            <div class="pv-memo rcp-only" id="pvMemoBox">
+              <div class="lb">Гүйлгээний утга</div>
+              <div id="pvMemo">—</div>
+            </div>
+            <div class="pv-ack rcp-only" id="pvAck">Дээрх мөнгийг бүрэн хүлээн авлаа.</div>
           </div>
         </div>
       </div>
@@ -396,6 +426,7 @@
   var LS_DOC = "nekhemjlekh_v1_docs";
   var KEY_INV_CTR = "nekhemjlekh_invoice_counter";
   var KEY_EST_CTR = "nekhemjlekh_estimate_counter";
+  var KEY_RCP_CTR = "nekhemjlekh_receipt_counter";
 
   var kind = "inv";
   var lineSeq = 0;
@@ -411,28 +442,57 @@
 
   function $(id) { return document.getElementById(id); }
 
+  function counterKey(k) {
+    if (k === "est") return KEY_EST_CTR;
+    if (k === "rcp") return KEY_RCP_CTR;
+    return KEY_INV_CTR;
+  }
+
+  function numberPrefix(k) {
+    if (k === "est") return "EST";
+    if (k === "rcp") return "RCP";
+    return "INV";
+  }
+
+  function kindLabel(k) {
+    if (k === "est") return "Үнийн санал";
+    if (k === "rcp") return "Баримт";
+    return "Нэхэмжлэх";
+  }
+
+  function kindTitle(k) {
+    if (k === "est") return "Үнийн санал";
+    if (k === "rcp") return "ТӨЛБӨРИЙН БАРИМТ";
+    return "Нэхэмжлэх";
+  }
+
+  function normalizeKind(k) {
+    if (k === "est" || k === "rcp") return k;
+    return "inv";
+  }
+
   function getCounter(k) {
-    var key = k === "inv" ? KEY_INV_CTR : KEY_EST_CTR;
-    var v = localStorage.getItem(key);
+    var v = localStorage.getItem(counterKey(k));
     if (v == null || v === "") return 0;
     var n = parseInt(v, 10);
     return isNaN(n) ? 0 : n;
   }
 
-  /** Increments the persistent counter and returns a new unique number (INV-00001 / EST-00001). */
+  /** Increments the persistent counter and returns a new unique number. */
   function issueNextNumber(k) {
-    var key = k === "inv" ? KEY_INV_CTR : KEY_EST_CTR;
+    var key = counterKey(k);
     var n = getCounter(k) + 1;
     localStorage.setItem(key, String(n));
-    var p = k === "inv" ? "INV" : "EST";
-    return p + "-" + String(n).padStart(5, "0");
+    return numberPrefix(k) + "-" + String(n).padStart(5, "0");
   }
 
   function setKind(k) {
-    kind = k;
-    $("tInv").classList.toggle("is-on", k === "inv");
-    $("tEst").classList.toggle("is-on", k === "est");
-    $("pvH").textContent = k === "inv" ? "Нэхэмжлэх" : "Үнийн санал";
+    kind = normalizeKind(k);
+    $("tInv").classList.toggle("is-on", kind === "inv");
+    $("tEst").classList.toggle("is-on", kind === "est");
+    $("tRcp").classList.toggle("is-on", kind === "rcp");
+    document.body.classList.toggle("is-rcp", kind === "rcp");
+    $("pvH").textContent = kindTitle(kind);
     render();
   }
 
@@ -469,6 +529,7 @@
     $("pvMyN").textContent = $("myNm").value || "\u2014";
     $("pvM").textContent = $("mail").value || "\u2014";
     $("pvT").textContent = $("tel").value || "\u2014";
+    $("pvMemo").textContent = $("memo").value.trim() || "\u2014";
 
     var tb = $("pvBody");
     tb.textContent = "";
@@ -543,12 +604,13 @@
       myNm: $("myNm").value,
       mail: $("mail").value,
       tel: $("tel").value,
+      memo: $("memo").value,
       lines: linesFromDom()
     };
   }
 
   function apply(st) {
-    kind = st.kind === "est" ? "est" : "inv";
+    kind = normalizeKind(st.kind);
     setKind(kind);
     $("dDate").value = st.dDate || today();
     $("dNo").value = st.dNo || "";
@@ -558,6 +620,7 @@
     $("myNm").value = st.myNm || "";
     $("mail").value = st.mail || "";
     $("tel").value = st.tel || "";
+    $("memo").value = st.memo || "";
     $("lines").textContent = "";
     lineSeq = 0;
     var L = st.lines && st.lines.length ? st.lines : [{ name: "", qty: 1, price: 0 }];
@@ -595,7 +658,7 @@
       var b = document.createElement("button");
       b.type = "button";
       b.className = "load";
-      var title = (doc.kind === "est" ? "Үнийн санал" : "Нэхэмжлэх") + " " + (doc.dNo || "");
+      var title = kindLabel(doc.kind) + " " + (doc.dNo || "");
       var dt = doc.savedAt ? new Date(doc.savedAt).toLocaleString("mn-MN") : "";
       b.innerHTML = "<div><div class=\"t\"></div><div class=\"d\"></div></div>";
       b.querySelector(".t").textContent = title;
@@ -621,6 +684,7 @@
     $("dNo").value = "";
     $("toCo").value = $("toNm").value = $("myCo").value = $("myNm").value = "";
     $("mail").value = $("tel").value = "";
+    $("memo").value = "";
     $("lines").textContent = "";
     lineSeq = 0;
     addLine({ name: "", qty: 1, price: 0 });
@@ -629,17 +693,18 @@
 
   $("tInv").addEventListener("click", function () {
     setKind("inv");
-    render();
   });
   $("tEst").addEventListener("click", function () {
     setKind("est");
-    render();
+  });
+  $("tRcp").addEventListener("click", function () {
+    setKind("rcp");
   });
 
   ["input", "change"].forEach(function (ev) {
     $("dDate").addEventListener(ev, render);
   });
-  ["toCo", "toNm", "myCo", "myNm", "mail", "tel"].forEach(function (id) {
+  ["toCo", "toNm", "myCo", "myNm", "mail", "tel", "memo"].forEach(function (id) {
     $(id).addEventListener("input", render);
   });
 
@@ -649,6 +714,58 @@
   });
 
   $("doPdf").addEventListener("click", function () { window.print(); });
+
+  function downloadWord() {
+    var clone = $("pvRoot").cloneNode(true);
+    clone.querySelectorAll(".rcp-only").forEach(function (el) {
+      if (kind !== "rcp") el.remove();
+    });
+
+    var styles =
+      "body{font-family:Arial,'Noto Sans',sans-serif;font-size:12pt;color:#1f2937;}" +
+      "h1,.pv-h{text-align:center;font-size:18pt;margin:0 0 12pt;border-bottom:2px solid #3b82f6;padding-bottom:6pt;}" +
+      ".pv-meta{margin-bottom:12pt;}" +
+      ".pv-blk{width:100%;margin-bottom:12pt;}" +
+      ".pv-to{border:1px solid #d1d5db;padding:8pt;margin-bottom:8pt;}" +
+      ".pv-to .lb{font-size:9pt;color:#6b7280;}" +
+      ".pv-fr{text-align:right;}" +
+      ".pv-fr .co{font-weight:bold;}" +
+      "table{width:100%;border-collapse:collapse;margin-top:8pt;}" +
+      "th,td{border:1px solid #d1d5db;padding:6pt;}" +
+      "th{background:#f3f4f6;text-align:left;}" +
+      "td.n,th.n{text-align:right;}" +
+      ".pv-sum{margin-top:10pt;width:55%;margin-left:auto;}" +
+      ".pv-sum .r{display:flex;justify-content:space-between;padding:3pt 0;}" +
+      ".pv-sum .g{font-weight:bold;border-top:2px solid #3b82f6;margin-top:4pt;padding-top:4pt;}" +
+      ".pv-memo{margin-top:12pt;padding:8pt;border:1px solid #e5e7eb;background:#f9fafb;}" +
+      ".pv-memo .lb{font-size:9pt;color:#6b7280;}" +
+      ".pv-ack{margin-top:14pt;text-align:center;font-weight:bold;}";
+
+    var html =
+      "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+      "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+      "xmlns='http://www.w3.org/TR/REC-html40'>" +
+      "<head><meta charset='utf-8'>" +
+      "<title>" + kindTitle(kind) + "</title>" +
+      "<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View>" +
+      "<w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->" +
+      "<style>" + styles + "</style></head><body>" +
+      clone.innerHTML +
+      "</body></html>";
+
+    var blob = new Blob(["\ufeff", html], { type: "application/msword" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var no = ($("dNo").value || "").trim() || (numberPrefix(kind) + "-draft");
+    a.href = url;
+    a.download = "nekhemjlekh_" + no + ".doc";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  $("doWord").addEventListener("click", downloadWord);
 
   $("doSave").addEventListener("click", function () {
     var num = issueNextNumber(kind);
@@ -673,7 +790,7 @@
   $("dDate").value = today();
   $("dNo").value = "";
   addLine({ name: "", qty: 1, price: 0 });
-  render();
+  setKind("inv");
   drawList();
 })();
 </script>
