@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     /* ===== VARIABLES ===== */
     :root {
@@ -512,6 +513,9 @@
       letter-spacing: 0.02em;
       box-shadow: 0 5px 24px rgba(196, 98, 45, 0.42);
       transition: background 0.2s, transform 0.22s, box-shadow 0.2s;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
     }
 
     .cta-btn:hover {
@@ -571,6 +575,205 @@
       .hero-btn { width: 100%; max-width: 280px; justify-content: center; }
       section { padding: 3.5rem 1rem; }
       .tools-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ===================================================
+       CONTACT MODAL
+    =================================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(37, 17, 5, 0.55);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.2rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--cream);
+      border-radius: var(--r);
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 24px 64px rgba(37, 17, 5, 0.35);
+      border: 1px solid var(--border);
+      position: relative;
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.25s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.open .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 1.5rem 0.2rem;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-l);
+      font-size: 1.4rem;
+      line-height: 1;
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .modal-close:hover {
+      background: var(--or-pale);
+      color: var(--or-dark);
+    }
+
+    .modal-body {
+      padding: 1rem 1.5rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    .field-input,
+    .field-textarea {
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 0.95rem;
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+
+    .field-input:focus,
+    .field-textarea:focus {
+      border-color: var(--or);
+      box-shadow: 0 0 0 3px rgba(196, 98, 45, 0.15);
+    }
+
+    .field-textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .field-error {
+      font-size: 0.78rem;
+      color: #B33A1A;
+      margin-top: 0.35rem;
+      display: none;
+    }
+
+    .field-error.show { display: block; }
+
+    .field-input.invalid,
+    .field-textarea.invalid {
+      border-color: #B33A1A;
+    }
+
+    .modal-submit {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      background: var(--or);
+      color: var(--white);
+      border: none;
+      padding: 0.95rem 1.5rem;
+      border-radius: var(--r-chip);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      box-shadow: 0 5px 24px rgba(196, 98, 45, 0.42);
+      transition: background 0.2s, transform 0.18s, box-shadow 0.2s, opacity 0.2s;
+      margin-top: 0.3rem;
+    }
+
+    .modal-submit:hover:not(:disabled) {
+      background: var(--or-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(139, 62, 20, 0.48);
+    }
+
+    .modal-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--earth);
+      color: var(--white);
+      padding: 0.95rem 1.5rem;
+      border-radius: var(--r-chip);
+      font-size: 0.92rem;
+      font-weight: 600;
+      z-index: 1100;
+      max-width: calc(100% - 2.4rem);
+      text-align: center;
+      box-shadow: 0 12px 36px rgba(37, 17, 5, 0.4);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+      line-height: 1.5;
+    }
+
+    .toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.error {
+      background: #8B2E14;
+    }
+
+    @media (max-width: 480px) {
+      .modal-header { padding: 1.2rem 1.2rem 0.1rem; }
+      .modal-body { padding: 0.9rem 1.2rem 1.4rem; }
     }
   </style>
 </head>
@@ -731,12 +934,12 @@
     </div><!-- /pricing-grid -->
 
     <div class="cta-wrap fade-up">
-      <a href="mailto:tushig.service@gmail.com?subject=Үйлчилгээний талаар асуулт" class="cta-btn">
+      <button type="button" class="cta-btn contact-open">
         Холбоо барих
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </a>
+      </button>
     </div>
 
   </div>
@@ -802,16 +1005,46 @@
     </div><!-- /pricing-grid -->
 
     <div class="cta-wrap fade-up">
-      <a href="mailto:tushig.service@gmail.com?subject=Үйлчилгээний талаар асуулт" class="cta-btn">
+      <button type="button" class="cta-btn contact-open">
         Холбоо барих
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </a>
+      </button>
     </div>
 
   </div>
 </section>
+
+<!-- ========================= CONTACT MODAL ========================= -->
+<div class="modal-overlay" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="contactModalTitle">Холбоо барих</h3>
+      <button type="button" class="modal-close" id="modalCloseBtn" aria-label="Хаах">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <label class="field-label" for="contactName">Нэр</label>
+        <input type="text" class="field-input" id="contactName" placeholder="Таны нэр" autocomplete="name">
+        <div class="field-error" id="nameError">Нэрээ оруулна уу</div>
+      </div>
+      <div>
+        <label class="field-label" for="contactEmail">И-мэйл</label>
+        <input type="email" class="field-input" id="contactEmail" placeholder="example@email.com" autocomplete="email">
+        <div class="field-error" id="emailError">Зөв и-мэйл хаяг оруулна уу</div>
+      </div>
+      <div>
+        <label class="field-label" for="contactMessage">Таны хүсэлт / асуулт</label>
+        <textarea class="field-textarea" id="contactMessage" placeholder="Таны хүсэлт эсвэл асуултыг бичнэ үү"></textarea>
+        <div class="field-error" id="messageError">Хүсэлт / асуултаа бичнэ үү</div>
+      </div>
+      <button type="button" class="modal-submit" id="contactSubmitBtn">Илгээх</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="contactToast" role="status" aria-live="polite"></div>
 
 <!-- ========================= FOOTER ========================= -->
 <footer>© 2026 Түшиг</footer>
@@ -828,6 +1061,124 @@
   }, { threshold: 0.1 });
 
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // ===== Contact modal + EmailJS =====
+  (function () {
+    const PUBLIC_KEY = 'X3Au2ue1PZFWu5yq4';
+    const SERVICE_ID = 'service_uaoi5fq';
+    const TEMPLATE_ID = 'template_q72ezhw';
+
+    emailjs.init({ publicKey: PUBLIC_KEY });
+
+    const overlay = document.getElementById('contactModal');
+    const closeBtn = document.getElementById('modalCloseBtn');
+    const submitBtn = document.getElementById('contactSubmitBtn');
+    const toast = document.getElementById('contactToast');
+    const nameInput = document.getElementById('contactName');
+    const emailInput = document.getElementById('contactEmail');
+    const messageInput = document.getElementById('contactMessage');
+    const nameError = document.getElementById('nameError');
+    const emailError = document.getElementById('emailError');
+    const messageError = document.getElementById('messageError');
+
+    let toastTimer = null;
+
+    function openModal() {
+      clearErrors();
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => nameInput.focus(), 50);
+    }
+
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function clearErrors() {
+      [nameInput, emailInput, messageInput].forEach(el => el.classList.remove('invalid'));
+      [nameError, emailError, messageError].forEach(el => el.classList.remove('show'));
+    }
+
+    function showToast(text, isError) {
+      toast.textContent = text;
+      toast.classList.toggle('error', !!isError);
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 4500);
+    }
+
+    function validate() {
+      clearErrors();
+      let ok = true;
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const message = messageInput.value.trim();
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      if (!name) {
+        nameInput.classList.add('invalid');
+        nameError.classList.add('show');
+        ok = false;
+      }
+      if (!email || !emailOk) {
+        emailInput.classList.add('invalid');
+        emailError.classList.add('show');
+        ok = false;
+      }
+      if (!message) {
+        messageInput.classList.add('invalid');
+        messageError.classList.add('show');
+        ok = false;
+      }
+      return ok;
+    }
+
+    document.querySelectorAll('.contact-open').forEach(btn => {
+      btn.addEventListener('click', openModal);
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+    });
+
+    submitBtn.addEventListener('click', function () {
+      if (!validate()) return;
+      if (submitBtn.disabled) return;
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const message = messageInput.value.trim();
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Илгээж байна...';
+
+      emailjs.send(SERVICE_ID, TEMPLATE_ID, {
+        '名前': name,
+        'メッセージ': message,
+        message: message,
+        email: email,
+        time: new Date().toLocaleString()
+      }).then(function () {
+        nameInput.value = '';
+        emailInput.value = '';
+        messageInput.value = '';
+        closeModal();
+        showToast('Баярлалаа! Таны хүсэлтийг хүлээн авлаа 😊', false);
+      }).catch(function () {
+        showToast('Уучлаарай, алдаа гарлаа. Дахин оролдоно уу', true);
+      }).finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Илгээх';
+      });
+    });
+  })();
 </script>
 
 </body>
