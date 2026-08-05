@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нэхэмжлэх / Үнийн санал үүсгэгч</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-soft: #eff6ff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --bg: #f9fafb;
+    --card: #fff;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Noto Sans", "Noto Sans Mongolian", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app-header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: var(--shadow);
+  }
+  .app-header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+  .app-header p { margin: 0.35rem 0 0; font-size: 0.875rem; color: var(--muted); }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem 2.5rem; }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 1.25rem;
+  }
+  .panel h2 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .panel h2::before {
+    content: "";
+    width: 4px;
+    height: 1em;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .toggle { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+  .toggle button {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border: 2px solid var(--border);
+    background: var(--card);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+  .toggle button:hover { border-color: var(--accent); color: var(--accent); }
+  .toggle button.is-on {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .field { margin-bottom: 0.9rem; }
+  .field > label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+  .btn {
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    border: none;
+    transition: background 0.15s, transform 0.08s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-ghost {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-del {
+    background: #fff;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+  .btn-del:hover { background: #fef2f2; }
+  .line-grid {
+    display: grid;
+    grid-template-columns: 1fr 76px 92px auto;
+    gap: 0.45rem;
+    align-items: start;
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px dashed var(--border);
+  }
+  @media (max-width: 600px) {
+    .line-grid { grid-template-columns: 1fr 1fr; }
+    .line-grid .span-all { grid-column: 1 / -1; }
+  }
+  .sub-hint {
+    font-size: 0.8rem;
+    color: var(--muted);
+    padding-top: 0.25rem;
+    white-space: nowrap;
+  }
+  .sum-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--accent-soft);
+    border-radius: var(--radius);
+    border: 1px solid #bfdbfe;
+    font-size: 0.9rem;
+  }
+  .sum-box .r { display: flex; justify-content: space-between; margin-bottom: 0.35rem; }
+  .sum-box .r strong { font-weight: 700; font-size: 1.05rem; padding-top: 0.4rem; margin-top: 0.35rem; border-top: 1px solid #93c5fd; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; }
+  .note { font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; }
+  .saved { margin-top: 1.5rem; }
+  .saved-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 220px; overflow-y: auto; }
+  .saved-row { display: flex; gap: 0.5rem; align-items: stretch; }
+  .saved-row button.load {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .saved-row button.load:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .saved-row button.load .t { font-weight: 600; font-size: 0.9rem; }
+  .saved-row button.load .d { font-size: 0.75rem; color: var(--muted); }
+  .saved-row button.rm {
+    flex-shrink: 0;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.75rem;
+    border: 1px solid #fecaca;
+    background: #fff;
+    color: #dc2626;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .saved-row button.rm:hover { background: #fef2f2; }
+  .pv-stick { position: sticky; top: 5.5rem; }
+  @media (max-width: 900px) { .pv-stick { position: static; } }
+  .pv-shell { background: #e5e7eb; border-radius: var(--radius); padding: 1rem; }
+  .a4 {
+    width: 100%;
+    max-width: 210mm;
+    margin: 0 auto;
+    aspect-ratio: 210 / 297;
+    background: #fff;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    border-radius: 2px;
+    padding: 8%;
+    font-size: clamp(10px, 2.1vw, 13px);
+    color: #1f2937;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 901px) { .a4 { font-size: 11px; } }
+  .pv-h {
+    text-align: center;
+    font-size: 1.55em;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.75em;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 0.35em;
+  }
+  .pv-meta { font-size: 0.92em; margin-bottom: 0.9em; }
+  .pv-blk { display: flex; gap: 1em; margin-bottom: 0.9em; }
+  .pv-to {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    padding: 0.6em;
+    border-radius: 4px;
+    min-height: 4.2em;
+  }
+  .pv-to .lb { font-size: 0.78em; color: #6b7280; margin-bottom: 0.2em; }
+  .pv-fr { flex: 1; text-align: right; font-size: 0.88em; line-height: 1.45; }
+  .pv-fr .co { font-weight: 700; }
+  table.pv { width: 100%; border-collapse: collapse; font-size: 0.86em; }
+  .pv th, .pv td { border: 1px solid #d1d5db; padding: 0.42em 0.48em; }
+  .pv th { background: #f3f4f6; font-weight: 600; text-align: left; }
+  .pv .n { text-align: right; white-space: nowrap; }
+  .pv-sum { margin-top: 0.65em; margin-left: auto; width: 56%; font-size: 0.9em; }
+  .pv-sum .r { display: flex; justify-content: space-between; padding: 0.22em 0; }
+  .pv-sum .g {
+    font-weight: 800;
+    border-top: 2px solid var(--accent);
+    margin-top: 0.35em;
+    padding-top: 0.35em;
+  }
+  @media print {
+    body { background: #fff; }
+    .no-print { display: none !important; }
+    .wrap { padding: 0; max-width: none; }
+    .layout { display: block; }
+    .pv-shell { padding: 0; background: #fff; box-shadow: none; }
+    .panel.preview { border: none; box-shadow: none; }
+    .a4 {
+      max-width: none;
+      width: 100%;
+      aspect-ratio: auto;
+      box-shadow: none;
+      padding: 12mm;
+      font-size: 11pt;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header no-print">
+  <h1>Нэхэмжлэх / Үнийн санал үүсгэгч</h1>
+  <p>Хялбар бөглөж, баримт үүсгэнэ.</p>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <div class="panel no-print">
+      <div class="toggle" role="group" aria-label="Баримтын төрөл">
+        <button type="button" id="tInv" class="is-on">Нэхэмжлэх</button>
+        <button type="button" id="tEst">Үнийн санал</button>
+      </div>
+
+      <h2>Үндсэн мэдээлэл</h2>
+      <div class="field">
+        <label for="dDate">Огноо</label>
+        <input type="date" id="dDate">
+      </div>
+      <div class="field">
+        <label for="dNo">Дугаар</label>
+        <input type="text" id="dNo" readonly style="background:#f3f4f6">
+      </div>
+      <div class="field">
+        <label for="toCo">Захиалагчийн нэр</label>
+        <input type="text" id="toCo" autocomplete="organization" placeholder="Жишээ ХХК">
+      </div>
+      <div class="field">
+        <label for="toNm">Хариуцагчийн нэр</label>
+        <input type="text" id="toNm" autocomplete="name" placeholder="Бат Болд">
+      </div>
+      <div class="field">
+        <label for="myCo">Таны байгууллагын нэр</label>
+        <input type="text" id="myCo" placeholder="Миний ХХК">
+      </div>
+      <div class="field">
+        <label for="myNm">Таны нэр</label>
+        <input type="text" id="myNm" placeholder="Дорж Сүх">
+      </div>
+      <div class="field">
+        <label for="mail">И-мэйл</label>
+        <input type="email" id="mail" autocomplete="email" placeholder="mail@example.com">
+      </div>
+      <div class="field">
+        <label for="tel">Утас</label>
+        <input type="tel" id="tel" autocomplete="tel" placeholder="9911-2233">
+      </div>
+
+      <h2 style="margin-top:1.5rem">Задаргаа</h2>
+      <div style="margin-bottom:0.6rem">
+        <button type="button" class="btn btn-ghost" id="addLine">Мөр нэмэх</button>
+      </div>
+      <div id="lines"></div>
+
+      <div class="sum-box">
+        <div class="r"><span>Дүн (татваргүй)</span><span id="sSub">₮0</span></div>
+        <div class="r"><span>НӨАТ (10%)</span><span id="sTax">₮0</span></div>
+        <div class="r"><strong>Нийт (татвартай)</strong><strong id="sTot">₮0</strong></div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="doPdf">PDF болгож хадгалах</button>
+        <button type="button" class="btn btn-ghost" id="doSave">Хадгалах</button>
+        <button type="button" class="btn btn-ghost" id="doNew">Шинэ баримт</button>
+      </div>
+      <p class="note">"PDF болгож хадгалах" товчлуур дээр дарвал хэвлэх цонх нээгдэнэ. Хэвлэхээс өмнө "PDF болгон хадгалах"-ыг сонгоно уу.</p>
+
+      <div class="saved">
+        <h2>Хадгалсан баримтууд</h2>
+        <div class="saved-list" id="sList"></div>
+      </div>
+    </div>
+
+    <div class="panel preview">
+      <h2 class="no-print">Урьдчилан харах</h2>
+      <div class="pv-stick">
+        <div class="pv-shell">
+          <div class="a4" id="pvRoot">
+            <div class="pv-h" id="pvH">Нэхэмжлэх</div>
+            <div class="pv-meta">
+              <div>Огноо: <span id="pvD">—</span></div>
+              <div>No. <span id="pvN">—</span></div>
+            </div>
+            <div class="pv-blk">
+              <div class="pv-to">
+                <div class="lb">Захиалагч</div>
+                <div id="pvCo">—</div>
+                <div id="pvNm">—</div>
+              </div>
+              <div class="pv-fr">
+                <div class="co" id="pvMyC">—</div>
+                <div id="pvMyN">—</div>
+                <div id="pvM">—</div>
+                <div id="pvT">—</div>
+              </div>
+            </div>
+            <table class="pv">
+              <thead>
+                <tr>
+                  <th style="width:40%">Бараа / үйлчилгээ</th>
+                  <th class="n">Тоо ширхэг</th>
+                  <th class="n">Нэгж үнэ</th>
+                  <th class="n">Дүн</th>
+                </tr>
+              </thead>
+              <tbody id="pvBody"></tbody>
+            </table>
+            <div class="pv-sum">
+              <div class="r"><span>Дүн (татваргүй)</span><span id="pSub">₮0</span></div>
+              <div class="r"><span>НӨАТ (10%)</span><span id="pTax">₮0</span></div>
+              <div class="r g"><span>Нийт (татвартай)</span><span id="pTot">₮0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var LS_DOC = "nekhemjlekh_v1_docs";
+  var KEY_INV_CTR = "nekhemjlekh_invoice_counter";
+  var KEY_EST_CTR = "nekhemjlekh_estimate_counter";
+
+  var kind = "inv";
+  var lineSeq = 0;
+
+  function tugrik(n) {
+    return "\u20ae" + Math.round(n).toLocaleString("en-US");
+  }
+
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  function getCounter(k) {
+    var key = k === "inv" ? KEY_INV_CTR : KEY_EST_CTR;
+    var v = localStorage.getItem(key);
+    if (v == null || v === "") return 0;
+    var n = parseInt(v, 10);
+    return isNaN(n) ? 0 : n;
+  }
+
+  /** Increments the persistent counter and returns a new unique number (INV-00001 / EST-00001). */
+  function issueNextNumber(k) {
+    var key = k === "inv" ? KEY_INV_CTR : KEY_EST_CTR;
+    var n = getCounter(k) + 1;
+    localStorage.setItem(key, String(n));
+    var p = k === "inv" ? "INV" : "EST";
+    return p + "-" + String(n).padStart(5, "0");
+  }
+
+  function setKind(k) {
+    kind = k;
+    $("tInv").classList.toggle("is-on", k === "inv");
+    $("tEst").classList.toggle("is-on", k === "est");
+    $("pvH").textContent = k === "inv" ? "Нэхэмжлэх" : "Үнийн санал";
+    render();
+  }
+
+  function linesFromDom() {
+    return [].map.call(document.querySelectorAll(".line"), function (el) {
+      return {
+        name: el.querySelector(".ln-name").value.trim(),
+        qty: parseFloat(el.querySelector(".ln-qty").value) || 0,
+        price: parseFloat(el.querySelector(".ln-price").value) || 0
+      };
+    });
+  }
+
+  function totals(rows) {
+    var sub = 0;
+    rows.forEach(function (r) { sub += r.qty * r.price; });
+    var tax = Math.floor(sub * 0.1);
+    return { sub: sub, tax: tax, tot: sub + tax };
+  }
+
+  function render() {
+    var rows = linesFromDom();
+    var t = totals(rows);
+
+    $("sSub").textContent = $("pSub").textContent = tugrik(t.sub);
+    $("sTax").textContent = $("pTax").textContent = tugrik(t.tax);
+    $("sTot").textContent = $("pTot").textContent = tugrik(t.tot);
+
+    $("pvD").textContent = $("dDate").value || "\u2014";
+    $("pvN").textContent = $("dNo").value || "\u2014";
+    $("pvCo").textContent = $("toCo").value || "\u2014";
+    $("pvNm").textContent = $("toNm").value || "\u2014";
+    $("pvMyC").textContent = $("myCo").value || "\u2014";
+    $("pvMyN").textContent = $("myNm").value || "\u2014";
+    $("pvM").textContent = $("mail").value || "\u2014";
+    $("pvT").textContent = $("tel").value || "\u2014";
+
+    var tb = $("pvBody");
+    tb.textContent = "";
+    rows.forEach(function (r) {
+      var tr = document.createElement("tr");
+      var line = r.qty * r.price;
+      var esc = function (s) {
+        var x = document.createElement("span");
+        x.textContent = s;
+        return x.innerHTML;
+      };
+      tr.innerHTML =
+        "<td>" + esc(r.name || "\u2014") + "</td>" +
+        '<td class="n">' + esc(String(r.qty)) + "</td>" +
+        '<td class="n">' + esc(tugrik(r.price)) + "</td>" +
+        '<td class="n">' + esc(tugrik(line)) + "</td>";
+      tb.appendChild(tr);
+    });
+  }
+
+  function subLine(el) {
+    var q = parseFloat(el.querySelector(".ln-qty").value) || 0;
+    var p = parseFloat(el.querySelector(".ln-price").value) || 0;
+    el.querySelector(".ln-sub").textContent = tugrik(q * p);
+  }
+
+  function addLine(data) {
+    var id = ++lineSeq;
+    var wrap = document.createElement("div");
+    wrap.className = "line line-grid";
+    wrap.dataset.id = String(id);
+    var nm = data && data.name ? data.name : "";
+    var q = data && data.qty != null ? data.qty : 1;
+    var pr = data && data.price != null ? data.price : 0;
+
+    wrap.innerHTML =
+      '<div class="field span-all" style="margin:0">' +
+      "<label>Бараа / үйлчилгээ</label>" +
+      '<input type="text" class="ln-name" placeholder="Жишээ: Вэб сайт хийх"></div>' +
+      '<div class="field" style="margin:0"><label>Тоо ширхэг</label>' +
+      '<input type="number" class="ln-qty" min="0" step="1"></div>' +
+      '<div class="field" style="margin:0"><label>Нэгж үнэ</label>' +
+      '<input type="number" class="ln-price" min="0" step="1"></div>' +
+      '<div class="sub-hint">Дүн <span class="ln-sub">\u20ae0</span></div>' +
+      '<div class="span-all" style="display:flex;justify-content:flex-end;margin-top:0.2rem">' +
+      '<button type="button" class="btn btn-del ln-rm">Мөр устгах</button></div>';
+
+    wrap.querySelector(".ln-name").value = nm;
+    wrap.querySelector(".ln-qty").value = q;
+    wrap.querySelector(".ln-price").value = pr;
+
+    $("lines").appendChild(wrap);
+
+    wrap.querySelectorAll(".ln-name, .ln-qty, .ln-price").forEach(function (inp) {
+      inp.addEventListener("input", function () { subLine(wrap); render(); });
+    });
+    wrap.querySelector(".ln-rm").addEventListener("click", function () {
+      wrap.remove();
+      render();
+    });
+    subLine(wrap);
+  }
+
+  function state() {
+    return {
+      kind: kind,
+      dDate: $("dDate").value,
+      dNo: $("dNo").value,
+      toCo: $("toCo").value,
+      toNm: $("toNm").value,
+      myCo: $("myCo").value,
+      myNm: $("myNm").value,
+      mail: $("mail").value,
+      tel: $("tel").value,
+      lines: linesFromDom()
+    };
+  }
+
+  function apply(st) {
+    kind = st.kind === "est" ? "est" : "inv";
+    setKind(kind);
+    $("dDate").value = st.dDate || today();
+    $("dNo").value = st.dNo || "";
+    $("toCo").value = st.toCo || "";
+    $("toNm").value = st.toNm || "";
+    $("myCo").value = st.myCo || "";
+    $("myNm").value = st.myNm || "";
+    $("mail").value = st.mail || "";
+    $("tel").value = st.tel || "";
+    $("lines").textContent = "";
+    lineSeq = 0;
+    var L = st.lines && st.lines.length ? st.lines : [{ name: "", qty: 1, price: 0 }];
+    L.forEach(function (x) { addLine(x); });
+    render();
+  }
+
+  function loadAll() {
+    try {
+      var j = localStorage.getItem(LS_DOC);
+      return j ? JSON.parse(j) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveAll(a) {
+    localStorage.setItem(LS_DOC, JSON.stringify(a));
+  }
+
+  function drawList() {
+    var box = $("sList");
+    box.textContent = "";
+    var arr = loadAll();
+    if (!arr.length) {
+      var p = document.createElement("p");
+      p.className = "note";
+      p.textContent = "Хадгалсан баримт байхгүй байна.";
+      box.appendChild(p);
+      return;
+    }
+    arr.slice().reverse().forEach(function (doc) {
+      var row = document.createElement("div");
+      row.className = "saved-row";
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "load";
+      var title = (doc.kind === "est" ? "Үнийн санал" : "Нэхэмжлэх") + " " + (doc.dNo || "");
+      var dt = doc.savedAt ? new Date(doc.savedAt).toLocaleString("mn-MN") : "";
+      b.innerHTML = "<div><div class=\"t\"></div><div class=\"d\"></div></div>";
+      b.querySelector(".t").textContent = title;
+      b.querySelector(".d").textContent = dt + " \u00b7 " + (doc.toCo || "(захиалагчгүй)");
+      b.addEventListener("click", function () { apply(doc); });
+      var r = document.createElement("button");
+      r.type = "button";
+      r.className = "rm";
+      r.textContent = "Устгах";
+      r.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        saveAll(loadAll().filter(function (x) { return x.id !== doc.id; }));
+        drawList();
+      });
+      row.appendChild(b);
+      row.appendChild(r);
+      box.appendChild(row);
+    });
+  }
+
+  function fresh() {
+    $("dDate").value = today();
+    $("dNo").value = "";
+    $("toCo").value = $("toNm").value = $("myCo").value = $("myNm").value = "";
+    $("mail").value = $("tel").value = "";
+    $("lines").textContent = "";
+    lineSeq = 0;
+    addLine({ name: "", qty: 1, price: 0 });
+    render();
+  }
+
+  $("tInv").addEventListener("click", function () {
+    setKind("inv");
+    render();
+  });
+  $("tEst").addEventListener("click", function () {
+    setKind("est");
+    render();
+  });
+
+  ["input", "change"].forEach(function (ev) {
+    $("dDate").addEventListener(ev, render);
+  });
+  ["toCo", "toNm", "myCo", "myNm", "mail", "tel"].forEach(function (id) {
+    $(id).addEventListener("input", render);
+  });
+
+  $("addLine").addEventListener("click", function () {
+    addLine({ name: "", qty: 1, price: 0 });
+    render();
+  });
+
+  $("doPdf").addEventListener("click", function () { window.print(); });
+
+  $("doSave").addEventListener("click", function () {
+    var num = issueNextNumber(kind);
+    $("dNo").value = num;
+    var a = loadAll();
+    var o = state();
+    o.id = "d_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
+    o.savedAt = new Date().toISOString();
+    a.push(o);
+    saveAll(a);
+    drawList();
+    render();
+    alert("Хадгаллаа.");
+  });
+
+  $("doNew").addEventListener("click", function () {
+    if (confirm("Одоогийн оруулсан мэдээлэл устах болно. Үргэлжлүүлэх үү?")) {
+      fresh();
+    }
+  });
+
+  $("dDate").value = today();
+  $("dNo").value = "";
+  addLine({ name: "", qty: 1, price: 0 });
+  render();
+  drawList();
+})();
+</script>
+</body>
+</html>
