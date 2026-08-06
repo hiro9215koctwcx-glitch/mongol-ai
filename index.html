@@ -493,10 +493,40 @@
       margin-top: 0.03rem;
     }
 
+    /* Price disclaimer (under pricing grid) */
+    .price-note {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-l);
+      line-height: 1.55;
+      margin: -1.4rem 0 2.4rem;
+      opacity: 0.88;
+    }
+
     /* CTA */
     .cta-wrap {
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .email-note {
+      display: inline-flex;
+      align-items: center;
       justify-content: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-l);
+      line-height: 1.5;
+      text-align: center;
+      max-width: 420px;
+    }
+
+    .email-note .email-note-icon {
+      flex-shrink: 0;
+      font-size: 0.95rem;
+      line-height: 1;
     }
 
     .cta-btn {
@@ -949,7 +979,13 @@
 
     </div><!-- /pricing-grid -->
 
+    <p class="price-note fade-up">Үнэ нь ойролцоогоор бөгөөд, таны хүсэлтээс хамаарч өөрчлөгдөж болно</p>
+
     <div class="cta-wrap fade-up">
+      <p class="email-note">
+        <span class="email-note-icon" aria-hidden="true">📩</span>
+        Бүх зүйл и-мэйлээр шийдэгдэнэ (уулзах, утасдах шаардлагагүй)
+      </p>
       <button type="button" class="cta-btn contact-open">
         Холбоо барих
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -1020,7 +1056,13 @@
 
     </div><!-- /pricing-grid -->
 
+    <p class="price-note fade-up">Үнэ нь ойролцоогоор бөгөөд, таны хүсэлтээс хамаарч өөрчлөгдөж болно</p>
+
     <div class="cta-wrap fade-up">
+      <p class="email-note">
+        <span class="email-note-icon" aria-hidden="true">📩</span>
+        Бүх зүйл и-мэйлээр шийдэгдэнэ (уулзах, утасдах шаардлагагүй)
+      </p>
       <button type="button" class="cta-btn contact-open">
         Холбоо барих
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
