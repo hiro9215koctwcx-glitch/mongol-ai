@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Захиалгын асуулга — Түшиг</title>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    :root {
+      --bg: #FBF7F2;
+      --surface: #ffffff;
+      --text: #2C1A0E;
+      --text-muted: #7D5C43;
+      --accent: #C4622D;
+      --accent-hover: #8F3E14;
+      --accent-soft: rgba(196, 98, 45, 0.12);
+      --border: #DEC4A5;
+      --shadow: 0 4px 24px rgba(139, 62, 20, 0.10);
+      --radius: 14px;
+      --radius-sm: 10px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 540px; margin: 0 auto; padding: 1.25rem 1rem 2.5rem; }
+    header { text-align: center; margin-bottom: 1.5rem; }
+    header h1 {
+      font-size: clamp(1.15rem, 4.5vw, 1.5rem);
+      font-weight: 800;
+      margin: 0 0 0.35rem;
+      letter-spacing: 0.01em;
+      color: var(--accent);
+    }
+    header p { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 1.35rem 1.15rem 1.5rem;
+    }
+    .progress-wrap { margin-bottom: 1.25rem; }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.45rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .progress-meta strong { color: var(--accent); font-weight: 700; }
+    .progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 50px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #D47440);
+      border-radius: 50px;
+      transition: width 0.35s ease;
+    }
+    .step-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .question {
+      font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+      font-weight: 700;
+      margin: 0 0 1rem;
+      line-height: 1.45;
+    }
+    .hint { font-size: 0.82rem; color: var(--text-muted); margin: 0.4rem 0 0; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .choices { display: flex; flex-direction: column; gap: 0.6rem; }
+    .choice-btn {
+      width: 100%;
+      text-align: left;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      font-size: 0.93rem;
+      font-family: inherit;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, transform 0.1s;
+      line-height: 1.5;
+    }
+    .choice-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .choice-btn:active { transform: scale(0.99); }
+    .choice-btn.is-selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      font-weight: 600;
+    }
+    .field, .field-input, textarea.field {
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.8rem 0.95rem;
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    textarea.field { min-height: 130px; resize: vertical; line-height: 1.6; }
+    .field:focus, .field-input:focus, textarea.field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(196, 98, 45, 0.15);
+    }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 1rem 0 0.4rem;
+    }
+    .nav-row { display: flex; gap: 0.6rem; margin-top: 1.1rem; }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 0.85rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 3px 14px rgba(196, 98, 45, 0.34);
+    }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(139, 62, 20, 0.4); }
+    .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+    .btn-primary.btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      box-shadow: none;
+    }
+    .btn-primary.btn-outline:hover { background: var(--accent-soft); }
+    .btn-secondary {
+      background: var(--accent-soft);
+      color: var(--text);
+      border: none;
+      border-radius: 50px;
+      padding: 0.85rem 1.3rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .btn-secondary:hover { background: rgba(196, 98, 45, 0.2); }
+    .summary-title { font-size: 1.25rem; font-weight: 800; margin: 0 0 1rem; color: var(--accent); }
+    .summary-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.1rem;
+      font-size: 0.87rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 340px;
+      overflow-y: auto;
+      color: var(--text);
+    }
+    .price-disclaimer {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      line-height: 1.55;
+      display: flex;
+      gap: 0.4rem;
+      align-items: flex-start;
+    }
+    .actions { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.1rem; }
+    .actions .btn-primary { width: 100%; }
+    .restart { text-align: center; margin-top: 1rem; }
+    .restart button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .restart button:hover { color: var(--accent); }
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #251105;
+      color: #fff;
+      padding: 0.85rem 1.4rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 1100;
+      max-width: calc(100% - 2.4rem);
+      text-align: center;
+      box-shadow: 0 12px 36px rgba(37, 17, 5, 0.4);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+      line-height: 1.5;
+    }
+    .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: #8B2E14; }
+    .done-box { text-align: center; padding: 1.5rem 0.5rem; }
+    .done-icon { font-size: 2.6rem; margin-bottom: 0.8rem; }
+    .done-title { font-size: 1.25rem; font-weight: 800; color: var(--accent); margin: 0 0 0.6rem; }
+    .done-text { font-size: 0.92rem; color: var(--text-muted); line-height: 1.7; margin: 0 0 1.3rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Түшиг — Захиалгын асуулга</h1>
+      <p>Хэдхэн асуултад хариулаад хүсэлтээ илгээнэ үү</p>
+    </header>
+    <div class="card" id="app-card">
+
+      <!-- QUIZ SCREEN -->
+      <div id="screen-quiz" class="screen active">
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span>Явц</span>
+            <span><strong id="step-num">1</strong> <span id="step-denom-wrap">/ <span id="step-denom">1</span></span></span>
+          </div>
+          <div class="progress-bar" role="progressbar" aria-valuemin="1" aria-valuemax="1" aria-valuenow="1" id="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 12%"></div>
+          </div>
+        </div>
+        <div class="step-label" id="step-label">Алхам 1</div>
+        <h2 class="question" id="question-text"></h2>
+        <div id="choices-area"></div>
+        <div class="nav-row" id="nav-back-wrap" style="display: none;">
+          <button type="button" class="btn-secondary" id="btn-back">Буцах</button>
+        </div>
+      </div>
+
+      <!-- CUSTOMER INFO SCREEN -->
+      <div id="screen-customer" class="screen">
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span>Явц</span>
+            <span><strong>Сүүлийн алхам</strong></span>
+          </div>
+          <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemax="100" aria-valuemin="1">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+        </div>
+        <div class="step-label">Холбоо барих мэдээлэл</div>
+        <h2 class="question">Таны нэр, имэйл хаяг</h2>
+        <p class="hint" style="margin-bottom: 0.5rem">Хүсэлтийг хүлээн авсны дараа бид имэйлээр эргэн холбогдоно.</p>
+        <label class="form-label" for="cust-name">Нэр <span class="hint" style="font-weight:400">(заавал)</span></label>
+        <input type="text" class="field-input" id="cust-name" name="cust-name" autocomplete="name">
+        <label class="form-label" for="cust-email">Имэйл хаяг <span class="hint" style="font-weight:400">(заавал)</span></label>
+        <input type="email" class="field-input" id="cust-email" name="cust-email" autocomplete="email">
+        <label class="form-label" for="cust-phone">Утасны дугаар <span class="hint" style="font-weight:400">(заавал биш)</span></label>
+        <input type="tel" class="field-input" id="cust-phone" name="cust-phone" autocomplete="tel">
+        <label class="form-label" for="cust-extra">Бусад хүсэлт, тайлбар <span class="hint" style="font-weight:400">(заавал биш)</span></label>
+        <textarea class="field" id="cust-extra" name="cust-extra" style="min-height: 90px"></textarea>
+        <div class="nav-row" style="margin-top: 1.25rem">
+          <button type="button" class="btn-secondary" id="btn-customer-back">Буцах</button>
+          <button type="button" class="btn-primary" id="btn-customer-next" style="flex: 1">Хүсэлтээ илгээх</button>
+        </div>
+      </div>
+
+      <!-- SUMMARY / DONE SCREEN -->
+      <div id="screen-summary" class="screen">
+        <div id="summary-content">
+          <h2 class="summary-title">Таны хүсэлтийн тойм</h2>
+          <div class="summary-box" id="summary-text"></div>
+          <div class="actions">
+            <button type="button" class="btn-primary" id="btn-submit">Илгээх</button>
+            <button type="button" class="btn-primary btn-outline" id="btn-copy">Хуулж авах</button>
+          </div>
+          <div class="restart">
+            <button type="button" id="btn-restart">Эхнээс нь дахин эхлэх</button>
+          </div>
+        </div>
+        <div id="done-content" style="display:none">
+          <div class="done-box">
+            <div class="done-icon">✅</div>
+            <div class="done-title">Хүсэлт амжилттай илгээгдлээ!</div>
+            <p class="done-text">Баярлалаа. Бид таны хүсэлтийг хүлээн авлаа.<br>Удахгүй имэйлээр эргэн холбогдох болно.</p>
+            <button type="button" class="btn-primary btn-outline" id="btn-restart2">Эхнээс нь дахин эхлэх</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status">Хуулж авлаа</div>
+
+  <script>
+    (function () {
+      if (typeof emailjs !== "undefined") {
+        emailjs.init("X3Au2ue1PZFWu5yq4");
+      }
+
+      // ===== EmailJS 設定（Түшиг） =====
+      var EMAIL_SERVICE_ID = "service_uaoi5fq";
+      var EMAIL_TEMPLATE_ID = "template_q72ezhw";
+
+      // ===== ルート定義 =====
+      // 各ルートは質問の配列。type: "choice"（選択）/ "text"（自由記述）
+      var ROUTES = {
+        web: {
+          label: "Вэбсайт хийлгэх",
+          steps: [
+            {
+              q: "Одоо танд вэбсайт байдаг уу?",
+              type: "choice",
+              choices: [
+                "Байхгүй (шинээр хийлгэх)",
+                "Зөвхөн сошиал хуудас (Facebook г.м) байгаа",
+                "Хуучин вэбсайт байгаа (шинэчлэх)"
+              ]
+            },
+            {
+              q: "Ямар хэмжээний вэбсайт хэрэгтэй вэ?",
+              type: "choice",
+              choices: [
+                "1 хуудас танилцуулга хангалттай",
+                "3–5 хуудас (танилцуулга, үйлчилгээ, холбоо барих г.м)",
+                "Захиалга, холбоо барих форм хэрэгтэй"
+              ]
+            },
+            {
+              q: "Голдуу хэн үзэх вэ?",
+              type: "choice",
+              choices: [
+                "Энгийн үйлчлүүлэгчид",
+                "Хамтрагч, бизнесийн түншүүд",
+                "Хоёулаа"
+              ]
+            },
+            {
+              q: "Ямар загвар (дизайн) хүсэж байна вэ?",
+              type: "choice",
+              choices: [
+                "Энгийн, цэвэрхэн",
+                "Тансаг, найдвартай төрх",
+                "Дулаан, ойр дотно мэдрэмж",
+                "Танд даатгая"
+              ]
+            },
+            {
+              q: "Хэзээ хэрэгтэй вэ?",
+              type: "choice",
+              choices: [
+                "2 долоо хоногийн дотор (яаралтай)",
+                "1 сарын дотор",
+                "2 сарын дотор",
+                "Одоохондоо бодож байгаа"
+              ]
+            },
+            {
+              q: "Төсвийн ойролцоо хэмжээ?",
+              type: "choice",
+              hasPrice: true,
+              choices: [
+                "₮450,000 орчим (1 хуудас танилцуулга)",
+                "₮800,000 орчим (3–5 хуудас)",
+                "₮1,500,000 орчим (форм бүхий бүрэн сайт)",
+                "Төсвөө хэлэлцмээр байна"
+              ]
+            }
+          ]
+        },
+        app: {
+          label: "Апп / хэрэгсэл хийлгэх",
+          steps: [
+            {
+              q: "Одоо ижил зүйл ашиглаж байгаа юу?",
+              type: "choice",
+              choices: [
+                "Байхгүй (шинээр хийлгэх)",
+                "Цаас, Excel дээр удирддаг",
+                "Хуучин хэрэгсэл байгаа (шинэчлэх)"
+              ]
+            },
+            {
+              q: "Голдуу хэн ашиглах вэ?",
+              type: "choice",
+              choices: [
+                "Зөвхөн би өөрөө",
+                "Дотоод хэдэн ажилтан",
+                "Үйлчлүүлэгчид (энгийн хүмүүс)",
+                "Дотоод болон үйлчлүүлэгч хоёулаа"
+              ]
+            },
+            {
+              q: "Мэдээлэл хадгалах, хуримтлуулах шаардлагатай юу?",
+              type: "choice",
+              choices: [
+                "Тийм (үйлчлүүлэгч, борлуулалт г.м бүртгэх)",
+                "Үгүй (тухайн үед нь ашиглаж чадвал болно)",
+                "Мэдэхгүй / хэлэлцмээр байна"
+              ]
+            },
+            {
+              q: "Хэзээ хэрэгтэй вэ?",
+              type: "choice",
+              choices: [
+                "2 долоо хоногийн дотор (яаралтай)",
+                "1 сарын дотор",
+                "2 сарын дотор",
+                "Одоохондоо бодож байгаа"
+              ]
+            },
+            {
+              q: "Төсвийн ойролцоо хэмжээ?",
+              type: "choice",
+              hasPrice: true,
+              choices: [
+                "₮900,000 орчим (1 үйлдэлтэй энгийн хэрэгсэл)",
+                "₮1,800,000 орчим (олон үйлдэл, мэдээлэл хадгалалттай)",
+                "Төсвөө хэлэлцмээр байна"
+              ]
+            }
+          ]
+        },
+        consult: {
+          label: "Заавал шийдээгүй / зөвлөлдмөөр байна",
+          steps: [
+            {
+              q: "Ямар асуудал, хүсэлтэй байгаагаа чөлөөтэй бичнэ үү",
+              type: "text",
+              hint: "Жишээ: юу хийлгэхээ мэдэхгүй байгаа, зөвлөгөө авмаар байна гэх мэт."
+            }
+          ]
+        }
+      };
+
+      var PRICE_DISCLAIMER = "Дурдсан үнэ нь зөвхөн ойролцоо тооцоо юм. Таны хүсэлтээс хамааран өөрчлөгдөж болно.";
+
+      var INTENT_CHOICES = [
+        { key: "web", label: "Вэбсайт хийлгэмээр байна" },
+        { key: "app", label: "Апп / хэрэгсэл хийлгэмээр байна" },
+        { key: "consult", label: "Заавал шийдээгүй / зөвлөлдмөөр байна" }
+      ];
+
+      // ===== 状態 =====
+      var flowKey = null;         // "web" | "app" | "consult"
+      var currentIndex = 0;       // ルート内の質問インデックス
+      var answers = [];           // 回答
+      var intentSelection = "";
+      var customer = { name: "", email: "", phone: "", extra: "" };
+
+      // ===== 要素 =====
+      var elQuiz = document.getElementById("screen-quiz");
+      var elCustomer = document.getElementById("screen-customer");
+      var elSummary = document.getElementById("screen-summary");
+      var elStepNum = document.getElementById("step-num");
+      var elStepDenom = document.getElementById("step-denom");
+      var elStepDenomWrap = document.getElementById("step-denom-wrap");
+      var elProgressFill = document.getElementById("progress-fill");
+      var elProgressBar = document.getElementById("progress-bar");
+      var elStepLabel = document.getElementById("step-label");
+      var elQuestion = document.getElementById("question-text");
+      var elChoices = document.getElementById("choices-area");
+      var elNavBack = document.getElementById("nav-back-wrap");
+      var elBtnBack = document.getElementById("btn-back");
+      var elSummaryText = document.getElementById("summary-text");
+      var elBtnCopy = document.getElementById("btn-copy");
+      var elBtnSubmit = document.getElementById("btn-submit");
+      var elBtnRestart = document.getElementById("btn-restart");
+      var elBtnRestart2 = document.getElementById("btn-restart2");
+      var elBtnCustomerBack = document.getElementById("btn-customer-back");
+      var elBtnCustomerNext = document.getElementById("btn-customer-next");
+      var elToast = document.getElementById("toast");
+      var elSummaryContent = document.getElementById("summary-content");
+      var elDoneContent = document.getElementById("done-content");
+
+      function disp(v) {
+        var s = v != null ? String(v).trim() : "";
+        return s ? s : "(хоосон)";
+      }
+
+      function showToastMessage(msg, ms, isError) {
+        ms = ms || 2800;
+        elToast.textContent = msg;
+        elToast.classList.remove("error");
+        if (isError) elToast.classList.add("error");
+        elToast.classList.add("show");
+        setTimeout(function () {
+          elToast.classList.remove("show");
+          setTimeout(function () {
+            elToast.textContent = "Хуулж авлаа";
+            elToast.classList.remove("error");
+          }, 300);
+        }, ms);
+      }
+
+      function totalSteps() {
+        // 分岐選択(1) + ルート質問数
+        if (!flowKey) return 1;
+        return 1 + ROUTES[flowKey].steps.length;
+      }
+
+      function updateProgress(currentHuman) {
+        var max = totalSteps();
+        elStepNum.textContent = String(currentHuman);
+        elStepDenom.textContent = String(max);
+        elStepDenomWrap.style.display = "inline";
+        elStepLabel.textContent = "Алхам " + currentHuman;
+        var pct = max > 0 ? (currentHuman / max) * 100 : 0;
+        elProgressFill.style.width = pct + "%";
+        elProgressBar.setAttribute("aria-valuenow", String(currentHuman));
+        elProgressBar.setAttribute("aria-valuemax", String(max));
+      }
+
+      // ===== 分岐選択画面 =====
+      function renderIntentStep() {
+        elStepNum.textContent = "1";
+        elStepDenomWrap.style.display = "none";
+        elStepLabel.textContent = "Алхам 1";
+        elProgressFill.style.width = "12%";
+        elProgressBar.setAttribute("aria-valuenow", "1");
+        elProgressBar.setAttribute("aria-valuemax", "1");
+
+        elQuestion.textContent = "Ямар үйлчилгээ хүсэж байна вэ?";
+        elNavBack.style.display = "none";
+        elChoices.innerHTML = "";
+
+        var wrap = document.createElement("div");
+        wrap.className = "choices";
+        var buttons = [];
+        INTENT_CHOICES.forEach(function (item) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "choice-btn";
+          btn.textContent = item.label;
+          if (item.key === intentSelection) btn.classList.add("is-selected");
+          btn.addEventListener("click", function () {
+            intentSelection = item.key;
+            buttons.forEach(function (b) { b.classList.remove("is-selected"); });
+            btn.classList.add("is-selected");
+          });
+          buttons.push(btn);
+          wrap.appendChild(btn);
+        });
+        elChoices.appendChild(wrap);
+
+        var row = document.createElement("div");
+        row.className = "nav-row";
+        var btnNext = document.createElement("button");
+        btnNext.type = "button";
+        btnNext.className = "btn-primary";
+        btnNext.style.flex = "1";
+        btnNext.textContent = "Үргэлжлүүлэх";
+        btnNext.addEventListener("click", function () {
+          if (!intentSelection) {
+            showToastMessage("Нэгийг сонгоно уу", 2200, true);
+            return;
+          }
+          flowKey = intentSelection;
+          currentIndex = 0;
+          answers = [];
+          renderRouteStep();
+          window.scrollTo(0, 0);
+        });
+        row.appendChild(btnNext);
+        elChoices.appendChild(row);
+      }
+
+      // ===== ルート内の質問描画 =====
+      function renderRouteStep() {
+        var route = ROUTES[flowKey];
+        var step = route.steps[currentIndex];
+        updateProgress(2 + currentIndex);
+        elQuestion.textContent = step.q;
+        elNavBack.style.display = "flex";
+        elChoices.innerHTML = "";
+
+        if (step.type === "choice") {
+          var wrap = document.createElement("div");
+          wrap.className = "choices";
+          var buttons = [];
+          step.choices.forEach(function (choice) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "choice-btn";
+            btn.textContent = choice;
+            if (answers[currentIndex] === choice) btn.classList.add("is-selected");
+            btn.addEventListener("click", function () {
+              answers[currentIndex] = choice;
+              buttons.forEach(function (b) { b.classList.remove("is-selected"); });
+              btn.classList.add("is-selected");
+              // 選択したら少し待って自動で次へ
+              setTimeout(function () { goNextInRoute(); }, 220);
+            });
+            buttons.push(btn);
+            wrap.appendChild(btn);
+          });
+          elChoices.appendChild(wrap);
+
+          if (step.hasPrice) {
+            var note = document.createElement("div");
+            note.className = "price-disclaimer";
+            note.innerHTML = "<span>💡</span><span>" + PRICE_DISCLAIMER + "</span>";
+            elChoices.appendChild(note);
+          }
+        } else if (step.type === "text") {
+          var ta = document.createElement("textarea");
+          ta.className = "field";
+          ta.id = "route-text";
+          ta.value = answers[currentIndex] || "";
+          elChoices.appendChild(ta);
+          if (step.hint) {
+            var h = document.createElement("p");
+            h.className = "hint";
+            h.textContent = step.hint;
+            elChoices.appendChild(h);
+          }
+          var row = document.createElement("div");
+          row.className = "nav-row";
+          var btnNext = document.createElement("button");
+          btnNext.type = "button";
+          btnNext.className = "btn-primary";
+          btnNext.style.flex = "1";
+          btnNext.textContent = "Үргэлжлүүлэх";
+          btnNext.addEventListener("click", function () {
+            var v = ta.value.trim();
+            if (!v) {
+              showToastMessage("Хэдэн үг бичнэ үү", 2200, true);
+              return;
+            }
+            answers[currentIndex] = v;
+            goNextInRoute();
+          });
+          row.appendChild(btnNext);
+          elChoices.appendChild(row);
+        }
+      }
+
+      function goNextInRoute() {
+        var route = ROUTES[flowKey];
+        if (currentIndex < route.steps.length - 1) {
+          currentIndex++;
+          renderRouteStep();
+          window.scrollTo(0, 0);
+        } else {
+          showCustomerScreen();
+        }
+      }
+
+      function goBackInRoute() {
+        if (currentIndex > 0) {
+          currentIndex--;
+          renderRouteStep();
+        } else {
+          renderIntentStep();
+        }
+        window.scrollTo(0, 0);
+      }
+
+      // ===== お客様情報画面 =====
+      function showCustomerScreen() {
+        elQuiz.classList.remove("active");
+        elSummary.classList.remove("active");
+        elCustomer.classList.add("active");
+        document.getElementById("cust-name").value = customer.name;
+        document.getElementById("cust-email").value = customer.email;
+        document.getElementById("cust-phone").value = customer.phone;
+        document.getElementById("cust-extra").value = customer.extra;
+        window.scrollTo(0, 0);
+      }
+
+      function readCustomerForm() {
+        customer.name = document.getElementById("cust-name").value.trim();
+        customer.email = document.getElementById("cust-email").value.trim();
+        customer.phone = document.getElementById("cust-phone").value.trim();
+        customer.extra = document.getElementById("cust-extra").value.trim();
+      }
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      // ===== まとめテキスト生成 =====
+      function buildSummaryText() {
+        var route = ROUTES[flowKey];
+        var lines = ["【Түшиг — Захиалгын хүсэлт】", ""];
+        lines.push("■ Үйлчилгээний төрөл");
+        lines.push(route.label);
+        lines.push("");
+        lines.push("■ Асуулгын хариултууд");
+        route.steps.forEach(function (step, i) {
+          var a = answers[i] != null ? String(answers[i]).trim() : "";
+          if (!a) a = "(хоосон)";
+          lines.push("・" + step.q);
+          lines.push("  → " + a);
+          lines.push("");
+        });
+        lines.push("■ Холбоо барих мэдээлэл");
+        lines.push("Нэр: " + disp(customer.name));
+        lines.push("Имэйл: " + disp(customer.email));
+        lines.push("Утас: " + disp(customer.phone));
+        if (customer.extra) {
+          lines.push("Бусад хүсэлт: " + customer.extra);
+        }
+        return lines.join("\n").trim();
+      }
+
+      function showSummaryScreen() {
+        elQuiz.classList.remove("active");
+        elCustomer.classList.remove("active");
+        elSummary.classList.add("active");
+        elSummaryContent.style.display = "block";
+        elDoneContent.style.display = "none";
+        elSummaryText.textContent = buildSummaryText();
+        window.scrollTo(0, 0);
+      }
+
+      // ===== コピー =====
+      function copyText(text, onDone) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(onDone).catch(function () {
+            legacyCopy(text); onDone();
+          });
+        } else {
+          legacyCopy(text); onDone();
+        }
+      }
+      function legacyCopy(text) {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+
+      // ===== 送信 =====
+      function submitToEmail() {
+        var message = buildSummaryText();
+        var params = {
+          "名前": customer.name,          // テンプレートの差し込み項目に合わせる
+          "メッセージ": message,
+          "message": message,
+          "email": customer.email,
+          "time": new Date().toLocaleString("mn-MN")
+        };
+        elBtnSubmit.disabled = true;
+        elBtnSubmit.textContent = "Илгээж байна...";
+
+        if (typeof emailjs === "undefined") {
+          showToastMessage("Илгээх сервис ачаалагдаагүй байна. Дараа дахин оролдоно уу.", 3500, true);
+          elBtnSubmit.disabled = false;
+          elBtnSubmit.textContent = "Илгээх";
+          return;
+        }
+
+        emailjs.send(EMAIL_SERVICE_ID, EMAIL_TEMPLATE_ID, params)
+          .then(function () {
+            elSummaryContent.style.display = "none";
+            elDoneContent.style.display = "block";
+            window.scrollTo(0, 0);
+          })
+          .catch(function (err) {
+            showToastMessage("Илгээхэд алдаа гарлаа. Дахин оролдоно уу.", 3500, true);
+            elBtnSubmit.disabled = false;
+            elBtnSubmit.textContent = "Илгээх";
+          });
+      }
+
+      function restartAll() {
+        flowKey = null;
+        currentIndex = 0;
+        answers = [];
+        intentSelection = "";
+        customer = { name: "", email: "", phone: "", extra: "" };
+        elBtnSubmit.disabled = false;
+        elBtnSubmit.textContent = "Илгээх";
+        elCustomer.classList.remove("active");
+        elSummary.classList.remove("active");
+        elQuiz.classList.add("active");
+        renderIntentStep();
+        window.scrollTo(0, 0);
+      }
+
+      // ===== イベント =====
+      elBtnBack.addEventListener("click", goBackInRoute);
+      elBtnCustomerBack.addEventListener("click", function () {
+        elCustomer.classList.remove("active");
+        elQuiz.classList.add("active");
+        // ルートの最後の質問に戻る
+        currentIndex = ROUTES[flowKey].steps.length - 1;
+        renderRouteStep();
+        window.scrollTo(0, 0);
+      });
+      elBtnCustomerNext.addEventListener("click", function () {
+        readCustomerForm();
+        if (!customer.name) {
+          showToastMessage("Нэрээ оруулна уу", 2400, true);
+          return;
+        }
+        if (!customer.email || !isValidEmail(customer.email)) {
+          showToastMessage("Зөв имэйл хаяг оруулна уу", 2400, true);
+          return;
+        }
+        showSummaryScreen();
+      });
+      elBtnCopy.addEventListener("click", function () {
+        copyText(buildSummaryText(), function () {
+          showToastMessage("Хуулж авлаа", 2000);
+        });
+      });
+      elBtnSubmit.addEventListener("click", submitToEmail);
+      elBtnRestart.addEventListener("click", restartAll);
+      if (elBtnRestart2) elBtnRestart2.addEventListener("click", restartAll);
+
+      // ===== 初期化 =====
+      renderIntentStep();
+    })();
+  </script>
+</body>
+</html>
