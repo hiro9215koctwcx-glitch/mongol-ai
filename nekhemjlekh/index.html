@@ -38,6 +38,15 @@
     z-index: 10;
     box-shadow: var(--shadow);
   }
+  .app-header .back-link {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .app-header .back-link:hover { text-decoration: underline; }
   .app-header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
   .app-header p { margin: 0.35rem 0 0; font-size: 0.875rem; color: var(--muted); }
   .wrap { max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem 2.5rem; }
@@ -291,6 +300,7 @@
 <body>
 
 <header class="app-header no-print">
+  <a href="https://mongol-ai-one.vercel.app/" class="back-link">← Түшиг нүүр хуудас</a>
   <h1>Нэхэмжлэх / Үнийн санал үүсгэгч</h1>
   <p>Хялбар бөглөж, баримт үүсгэнэ.</p>
 </header>
