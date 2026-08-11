@@ -569,6 +569,29 @@
       transform: translateY(-4px);
       box-shadow: 0 12px 36px rgba(139, 62, 20, 0.52);
     }
+    /* ヒアリングフォーム誘導ボタン（アウトライン） */
+    .cta-btn-outline {
+      background: transparent;
+      color: var(--or-dark);
+      border: 1.5px solid var(--or);
+      box-shadow: none;
+      margin-top: 0.85rem;
+    }
+    .cta-btn-outline:hover {
+      background: var(--or-pale);
+      color: var(--or-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 22px rgba(196, 98, 45, 0.2);
+    }
+    /* 先着割引の一言 */
+    .promo-hint {
+      margin: 0.75rem 0 0;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--or-dark);
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
 
     /* ===================================================
        FOOTER
@@ -840,7 +863,7 @@
           <path d="M7 2v10M2 7l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </a>
-      <a href="#service" class="hero-btn outline">Вэб үйлчилгээ</a>
+      <a href="#service" class="hero-btn outline" onclick="event.preventDefault(); document.getElementById('service').scrollIntoView({behavior:'smooth'});">Вэб үйлчилгээ</a>
     </div>
   </div>
   <div class="scroll-hint" aria-hidden="true">
@@ -1008,6 +1031,13 @@
           <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
+      <a href="https://mongol-ai-one.vercel.app/asuulga/" target="_blank" rel="noopener" class="cta-btn cta-btn-outline">
+        Дэлгэрэнгүй захиалга өгөх
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <p class="promo-hint">🎁 Энэ сарын эхний 3 хүнд 10% хямдрал</p>
     </div>
 
   </div>
@@ -1085,6 +1115,13 @@
           <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
+      <a href="https://mongol-ai-one.vercel.app/asuulga/" target="_blank" rel="noopener" class="cta-btn cta-btn-outline">
+        Дэлгэрэнгүй захиалга өгөх
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <p class="promo-hint">🎁 Энэ сарын эхний 3 хүнд 10% хямдрал</p>
     </div>
 
   </div>
