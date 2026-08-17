@@ -1,0 +1,32 @@
+{
+  "name": "Нэхэмжлэх үүсгэгч — Түшиг",
+  "short_name": "Нэхэмжлэх",
+  "description": "Нэхэмжлэх, үнийн санал, баримтыг хялбар үүсгэнэ. Бүртгэлгүй, үнэгүй.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F1E8",
+  "theme_color": "#C4622D",
+  "lang": "mn",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
