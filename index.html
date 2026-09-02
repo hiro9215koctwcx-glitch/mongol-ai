@@ -232,6 +232,7 @@
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
       -webkit-mask-composite: xor; mask-composite: exclude;
       opacity: 0; transition: opacity 0.3s ease;
+      pointer-events: none; /* 飾りの層がクリックを奪わないようにする */
     }
     .tool-card:hover { transform: translateY(-8px); background: var(--card-h); border-color: transparent; }
     .tool-card:hover::before { opacity: 1; }
@@ -249,7 +250,7 @@
       background: rgba(232, 151, 106, 0.1); color: var(--or-light);
       font-size: 0.73rem; font-weight: 600; padding: 0.22rem 0.7rem; border-radius: 20px;
     }
-    .tool-link { color: var(--or-light); font-weight: 700; font-size: 0.92rem; text-decoration: none; margin-top: auto; }
+    .tool-link { color: var(--or-light); font-weight: 700; font-size: 0.92rem; text-decoration: none; margin-top: auto; position: relative; z-index: 2; }
     .tool-link:hover { color: var(--or-glow); }
 
     /* ===================================================
