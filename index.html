@@ -322,6 +322,24 @@
     }
     .cta-btn-outline:hover { background: rgba(232, 151, 106, 0.08); color: var(--text); border-color: var(--or-light); box-shadow: none; }
 
+    /* Messenger（写真送信）— メインCTAより控えめなオレンジ */
+    .messenger-note {
+      font-size: 0.85rem; color: var(--text-dim); line-height: 1.6;
+      text-align: center; max-width: 440px; margin: 0.6rem 0 0.1rem;
+    }
+    .messenger-cta {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      text-decoration: none; cursor: pointer; font-family: inherit;
+      background: rgba(196, 98, 45, 0.12); color: var(--or-light);
+      border: 1.5px solid var(--or); border-radius: var(--r-chip);
+      padding: 0.8rem 1.9rem; font-size: 0.95rem; font-weight: 700;
+      transition: all 0.22s;
+    }
+    .messenger-cta:hover {
+      background: rgba(196, 98, 45, 0.22); color: #fff;
+      transform: translateY(-3px); box-shadow: 0 6px 24px rgba(196, 98, 45, 0.35);
+    }
+
     .promo-hint { margin: 0.75rem 0 0; font-size: 0.82rem; font-weight: 600; color: var(--or-light); text-align: center; letter-spacing: 0.01em; }
 
     /* ===================================================
@@ -618,6 +636,13 @@
           <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
+
+      <!-- Messenger: 写真送信ボタン（最初のお問い合わせ導線の下にのみ設置） -->
+      <p class="messenger-note">📷 Загвар зургаа доорх товчоор бидний баг руу шууд илгээгээрэй</p>
+      <a id="messengerPhotoBtn" href="https://m.me/61592805029043" target="_blank" rel="noopener" class="messenger-cta">
+        📷 Зургаа Messenger-ээр илгээх
+      </a>
+
       <a href="https://mongol-ai-one.vercel.app/asuulga/" target="_blank" rel="noopener" class="cta-btn cta-btn-outline">
         Дэлгэрэнгүй захиалга өгөх
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -986,6 +1011,15 @@
     document.querySelectorAll('.contact-open').forEach(btn => {
       btn.addEventListener('click', openModal);
     });
+
+    // ===== Messenger 写真送信ボタン：事前入力メッセージを encodeURIComponent で付与 =====
+    (function () {
+      const mBtn = document.getElementById('messengerPhotoBtn');
+      if (mBtn) {
+        const msg = 'Сайн байна уу! Түшиг сайтаас байна. Ийм загвартай юм хийлгэхийг хүсэж байна, зургаа доор хавсаргая 👇';
+        mBtn.href = 'https://m.me/61592805029043?text=' + encodeURIComponent(msg);
+      }
+    })();
 
     closeBtn.addEventListener('click', closeModal);
 
