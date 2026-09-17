@@ -29,8 +29,8 @@ const REPLIES = {
 const QUICK_REPLIES = [
   { title: '🌐 Вэб сайт', payload: 'SERVICE_WEB' },
   { title: '📱 Апп', payload: 'SERVICE_APP' },
-  { title: '🎨 Дизайн, зураг, видео', payload: 'SERVICE_CREATIVE' },
-  { title: '💬 Бусад / Асуумаар байна', payload: 'SERVICE_OTHER' },
+  { title: '🎨 Дизайн', payload: 'SERVICE_CREATIVE' },
+  { title: '💬 Бусад асуулт', payload: 'SERVICE_OTHER' },
 ];
 
 module.exports = { REPLIES, QUICK_REPLIES };
